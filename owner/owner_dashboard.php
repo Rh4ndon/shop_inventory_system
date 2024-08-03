@@ -1,4 +1,7 @@
-<?php include('../controllers/session.php')?>
+<?php 
+@include('../controllers/session.php');
+@include '../models/dbcon.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -111,6 +114,49 @@
                             </div>
                         </li>
 
+                        <?php
+                         $query_notification = mysqli_query($conn,"SELECT * FROM products WHERE quantity = 5 or quantity = 10 ") or die(mysqli_error());
+                         $notif_count = mysqli_num_rows($query_notification );
+                                             
+                        ?>
+
+                        <!-- Nav Item - Alerts -->
+                        <li class="nav-item dropdown no-arrow mx-1">
+                            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-bell fa-fw"></i>
+                                <!-- Counter - Alerts -->
+                                <span class="badge badge-danger badge-counter"><?= $notif_count ?></span>
+                            </a>
+                            <!-- Dropdown - Alerts -->
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="alertsDropdown">
+                                <h6 class="dropdown-header">
+                                    Alerts Center
+                                </h6>
+                        <?php
+                         $query_alerts= mysqli_query($conn,"SELECT * FROM products WHERE quantity = 5 or quantity = 10 ") or die(mysqli_error()); 
+                         while($row = mysqli_fetch_array($query_alerts)){
+                         ?>
+
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <div class="mr-3">
+                                        <div class="icon-circle bg-primary">
+                                            <i class="fas fa-file-alt text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="small text-gray-500">December 12, 2019</div>
+                                        <span class="font-weight-bold"><?= $row['product_name'] ?> from <?= $row['product_brand'] ?> is running low only has <?= $row['quantity'] ?> on stock</span>
+                                    </div>
+                                </a>
+                                
+                        <?php } ?>
+                                <a class="dropdown-item text-center small text-gray-500" href="#"></a>
+                            </div>
+                        </li>
+
+                                           
                     
 
                        
@@ -170,11 +216,16 @@
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                 Total Profit</div>
                                                 <?php 
-                                                @include '../models/dbcon.php';
-                                                $query_profit = mysqli_query($conn,"SELECT SUM(profit) as total FROM transactions ") or die(mysqli_error());
-                                                $total_profit = mysqli_fetch_array($query_profit)
+                                            
+                                                $query_poffline = mysqli_query($conn,"SELECT SUM(profit) as total FROM transactions ") or die(mysqli_error());
+                                                $total_poffline = mysqli_fetch_array($query_poffline);
+                                                $query_ponline = mysqli_query($conn,"SELECT SUM(price - retail_price) as total FROM orders WHERE status = 'Done'") or die(mysqli_error());
+                                                $total_ponline = mysqli_fetch_array($query_ponline);
+
+                                                $total_profit = $total_ponline['total'] + $total_poffline['total'];
+
                                                 ?>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">&#8369; <?php echo $total_profit['total'];?></div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">&#8369; <?php echo $total_profit;?></div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -195,11 +246,14 @@
                                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                 Total Product Sold</div>
                                                 <?php 
-                                                @include '../models/dbcon.php';
+                                                
                                                 $query_tproducts = mysqli_query($conn,"SELECT SUM(quantity) as total FROM transactions ") or die(mysqli_error());
-                                                $total_product = mysqli_fetch_array($query_tproducts)
+                                                $total_product = mysqli_fetch_array($query_tproducts);
+                                                $query_tonline = mysqli_query($conn,"SELECT SUM(quantity) as total FROM orders WHERE status = 'Done' ") or die(mysqli_error());
+                                                $total_online = mysqli_fetch_array($query_tonline);
+                                                $total_sold= $total_product['total'] + $total_online['total'];
                                                 ?>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_product['total'];?></div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_sold;?></div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
@@ -218,7 +272,7 @@
                                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                                 Pending Orders</div>
                                                 <?php
-                                                @include '../models/dbcon.php';
+                                                
 	                                            $query_pending = mysqli_query($conn,"select * from orders where status = 'Pending' ") or die(mysqli_error());
 	                                            $num_row_pending = mysqli_num_rows($query_pending);
 		                                        
@@ -243,7 +297,7 @@
                                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Finished Orders
                                             </div>
                                             <?php
-                                                @include '../models/dbcon.php';
+                                                
 	                                            $query_done = mysqli_query($conn,"select * from orders where status = 'Done' ") or die(mysqli_error());
 	                                            $num_row_done = mysqli_num_rows($query_done);
 		                                        
@@ -296,7 +350,7 @@
                                     
                                     <tbody>
                             <?php
-                            @include '../models/dbcon.php';
+                            
 	                        $query = mysqli_query($conn,"select * from products ORDER BY id ASC") or die(mysqli_error());
 	                        while ($row = mysqli_fetch_array($query)) {
 		                    $id = $row['id'];
@@ -337,7 +391,7 @@
                                
                                     <tbody>
                             <?php
-                            @include '../models/dbcon.php';
+                            
 	                        $query2 = mysqli_query($conn,"select * from orders") or die(mysqli_error());
 	                        while ($row2 = mysqli_fetch_array($query2)) {
                             $price = $row2['price'];
@@ -381,14 +435,16 @@
                                             <th>Product Name</th>
                                             <th>Product Brand</th>
                                             <th>Quantity</th>
+                                            <th>Price</th>
                                             <th>Profit</th>
+                                            <th>Sold To</th>
                                             <th>Date of Transaction</th>
                                         </tr>
                                     </thead>
                                  
                                     <tbody>
                             <?php
-                            @include '../models/dbcon.php';
+                            
 	                        $query2 = mysqli_query($conn,"select * from transactions ORDER BY day DESC") or die(mysqli_error());
 	                        while ($row2 = mysqli_fetch_array($query2)) {
 		                    $id = $row2['id'];
@@ -397,7 +453,9 @@
                                             <td><?php echo $row2['product_name']; ?></td>
                                             <td><?php echo $row2['product_brand']; ?></td>
                                             <td><?php echo $row2['quantity']; ?></td>
+                                            <td><?php echo $row2['price']; ?></td>
                                             <td><?php echo $row2['profit']; ?></td>
+                                            <td><?php echo $row2['customer']; ?></td>
                                             <td><?php echo $row2['day']; ?></td>
                                         </tr>
                                     
@@ -428,7 +486,7 @@
                                   
                                     <tbody>
                             <?php
-                            @include '../models/dbcon.php';
+                            
 	                        $query_users = mysqli_query($conn,"select * from user") or die(mysqli_error());
 	                        while ($row_users = mysqli_fetch_array($query_users)) {
 		                    ?>

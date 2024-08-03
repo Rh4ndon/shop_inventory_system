@@ -1,4 +1,7 @@
-<?php include('../controllers/session.php')?>
+<?php 
+include('../controllers/session.php');
+@include '../models/dbcon.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -105,6 +108,49 @@
                             </div>
                         </li>
 
+                        <?php
+                         $query_notification = mysqli_query($conn,"SELECT * FROM products WHERE quantity = 5 or quantity = 10 ") or die(mysqli_error());
+                         $notif_count = mysqli_num_rows($query_notification );
+                                             
+                        ?>
+
+                         <!-- Nav Item - Alerts -->
+                        <li class="nav-item dropdown no-arrow mx-1">
+                            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-bell fa-fw"></i>
+                                <!-- Counter - Alerts -->
+                                <span class="badge badge-danger badge-counter"><?= $notif_count ?></span>
+                            </a>
+                            <!-- Dropdown - Alerts -->
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="alertsDropdown">
+                                <h6 class="dropdown-header">
+                                    Alerts Center
+                                </h6>
+                        <?php
+                         $query_alerts= mysqli_query($conn,"SELECT * FROM products WHERE quantity = 5 or quantity = 10 ") or die(mysqli_error()); 
+                         while($row = mysqli_fetch_array($query_alerts)){
+                         ?>
+
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <div class="mr-3">
+                                        <div class="icon-circle bg-primary">
+                                            <i class="fas fa-file-alt text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="small text-gray-500">December 12, 2019</div>
+                                        <span class="font-weight-bold"><?= $row['product_name'] ?> from <?= $row['product_brand'] ?> is running low only has <?= $row['quantity'] ?> on stock</span>
+                                    </div>
+                                </a>
+                                
+                        <?php } ?>
+                                <a class="dropdown-item text-center small text-gray-500" href="#"></a>
+                            </div>
+                        </li>
+
+
                     
 
                        
@@ -145,8 +191,57 @@
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
 
+
+                
                     <!-- Page Heading -->
                     <h1 class="h3 mb-4 text-gray-800">Assistant Page</h1>
+
+
+                                
+                    <!-- Basic Card Example -->
+                    <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Add Product</h6>
+                                </div>
+                                <div class="card-body">
+                                <form method="post" action="../controllers/transactions.php">
+                                <div class="form-group row">
+                                
+                                <div class="col-sm-4">
+                                    
+                                    <input class="form-control form-control-user" name="product_name" type="text" placeholder="Product Name" required>
+                                </div>
+                                <div class="col-sm-4">
+                                    <input class="form-control form-control-user" name="product_brand" type="text" placeholder="Product Brand" required>
+                                </div>
+                                <div class="col-sm-4">
+                                    <input class="form-control form-control-user" name="supplier" type="text" placeholder="Supplier Name" required>
+                                </div>
+                               
+                                </div>
+                                <div class="form-group row">
+                                <div class="col-sm-4">
+                                    <input class="form-control form-control-user" name="quantity" type="number" min="1" max="99999"placeholder="Quantity" required>
+                                </div>
+                                <div class="col-sm-4">
+                                    <input class="form-control form-control-user" name="rprice" type="number" min="1" max="99999"placeholder="Retail Price" required>
+                                </div>
+                                <div class="col-sm-4">
+                                    <input class="form-control form-control-user" name="price" type="number" min="1" max="99999"placeholder="Market price" required>
+                                </div>
+                                
+                                </div>
+                                <div class="form-group row"></div>
+                                <div class="col-sm-4">
+                                <button type="submit" name="add" class="btn btn-primary btn-user btn-block">Add</button>
+                                </div>
+                                </form>
+                                </div>
+                    </div>
+
+
+
+
 
                      <!-- DataTales Example -->
                      <div class="card shadow mb-4">
@@ -163,14 +258,15 @@
                                             <th>Quantity</th>
                                             <th>Retail Price</th>
                                             <th>Market Price</th>
+                                            <th>Supplier Name</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
                                  
                                     <tbody>
                             <?php
-                            @include '../models/dbcon.php';
-	                        $query = mysqli_query($conn,"select * from products") or die(mysqli_error());
+                            
+	                        $query = mysqli_query($conn,"select * from products order by supplier asc") or die(mysqli_error());
 	                        while ($row = mysqli_fetch_array($query)) {
 		                    
 		                    ?>
@@ -181,6 +277,7 @@
                                             <td><?php echo $row['quantity']; ?></td>
                                             <td>&#8369; <?php echo $row['retail_price']; ?></td>
                                             <td>&#8369; <?php echo $row['price']; ?></td>
+                                            <td><?php echo $row['supplier']; ?></td>
                                             <td>
                                             <form method="post" action="../controllers/transactions.php">
                                             <input type="hidden" name="del_id" value="<?php echo $row['id']; ?>">
@@ -214,41 +311,78 @@
 
 
 
-                    <!-- Basic Card Example -->
+
+
+
+                    
+
+
+
+
+                    <!-- DataTales Example -->
                     <div class="card shadow mb-4">
-                                <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Add Product</h6>
-                                </div>
-                                <div class="card-body">
-                                <form method="post" action="../controllers/transactions.php">
-                                <div class="form-group row">
-                                
-                                <div class="col-sm-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Returned Products Due to Damage</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Product Name</th>
+                                            <th>Product Brand</th>
+                                            <th>Quantity</th>
+                                            <th>Retail Price</th>
+                                            <th>Market Price</th>
+                                            <th>Date</th>  
+                                            <th>Reason</th>                                      
+                                           
+                                        </tr>
+                                    </thead>
+                                 
+                                    <tbody>
+                                  
+                            <?php
+                            
+	                        $query_damage = mysqli_query($conn,"select * from orders where status = 'Damaged'") or die(mysqli_error());
+	                        while ($row_damaged = mysqli_fetch_array($query_damage)) {
+                            $price = $row_damaged['price'];
+                            $retail = $row_damaged['retail_price'];
+                            $qnt = $row_damaged['quantity'];
+                            $profit = ($price - $retail)* $qnt;
+                            $stat = $row_damaged['status'];
+                        
+
+                            
+		                    ?>
+                                        <tr>
+                                            <td><?php echo $row_damaged['product_name']; ?></td>
+                                            <td><?php echo $row_damaged['product_brand']; ?></td>
+                                            <td><?php echo $row_damaged['quantity']; ?></td>
+                                            <td>&#8369; <?php echo $row_damaged['price']; ?></td>
+                                            <td>&#8369; <?php echo $profit; ?></td>
+                                            <td><?php echo $row_damaged['day']; ?></td>
+                                            <td><?php echo $row_damaged['status']; ?></td>
+                                      
+                                        </tr>
                                     
-                                    <input class="form-control form-control-user" name="product_name" type="text" placeholder="Product Name" required>
-                                </div>
-                                <div class="col-sm-4">
-                                    <input class="form-control form-control-user" name="product_brand" type="text" placeholder="Product Brand" required>
-                                </div>
-                                <div class="col-sm-4">
-                                    <input class="form-control form-control-user" name="quantity" type="number" min="1" max="99999"placeholder="Quantity" required>
-                                </div>
-                                </div>
-                                <div class="form-group row">
-                                <div class="col-sm-4">
-                                    <input class="form-control form-control-user" name="rprice" type="number" min="1" max="99999"placeholder="Retail Price" required>
-                                </div>
-                                <div class="col-sm-4">
-                                    <input class="form-control form-control-user" name="price" type="number" min="1" max="99999"placeholder="Market price" required>
-                                </div>
-                                </div>
-                                <div class="form-group row"></div>
-                                <div class="col-sm-4">
-                                <button type="submit" name="add" class="btn btn-primary btn-user btn-block">Add</button>
-                                </div>
-                                </form>
-                                </div>
+                                  <?php } ?>
+                       
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
+
+
+
+
+
+                    
+
+
+
+
 
                 </div>
                 <!-- /.container-fluid -->

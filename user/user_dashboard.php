@@ -1,5 +1,8 @@
-<?php include('../controllers/session.php')?>
-<?php include('../controllers/find.php');?>
+<?php 
+include('../controllers/session.php');
+include('../controllers/find.php');
+@include '../models/dbcon.php';
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,7 +15,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Cashier</title>
+    <title>Egay's Enterprises</title>
 
     <!-- Custom fonts for this template-->
     <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -114,7 +117,7 @@
                     
 
                         <?php
-                            @include '../models/dbcon.php';
+                            
 	                        $query_user = mysqli_query($conn,"select * from user where user_id = $session_id") or die(mysqli_error());
 	                        $row_user = mysqli_fetch_array($query_user);
 		                    $user_id = $row_user['user_id'];
@@ -160,26 +163,42 @@
                     <h1 class="h3 mb-4 text-gray-800"><?php echo $row_user['firstname'] ?> <?php echo $row_user['lastname'] ?></h1>
 
 
-               
+             
+                    <div class="row">
+
                      <!-- Basic Card Example -->
-                     <div class="card shadow mb-4">
+                     <div class="card shadow mb-4 mr-4">
                                 <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Order Product</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary">Add Product to Cart<br><br>
+                                    <button type="button" onClick="window.location.reload();" class="btn btn-light btn-icon-split">
+                                    <span class="icon text-gray-600">
+                                            <i class="fas fa-arrow-right"></i>
+                                        </span>
+                                        <span class="text">Refresh Page</span>
+                                    </button>
+                                    </h6>
+                                    
                                 </div>
                                 <div class="card-body">
                                 <form method="post" action="../controllers/transactions.php">
+                                <input type="hidden" name="cart_owner" value="<?php echo $row_user['firstname']; ?> <?php echo $row_user['lastname']; ?>">
+                           
                                 <div class="form-group row">
                                 
+                                
                                 <div class="col-sm-4">
-                                    <input class="form-control form-control-user" list="productname" autocomplete="off" name="product_name" type="text" placeholder="Product Name" required>
+                                    <label for="pname">Product Name</label>
+                                    <input class="form-control form-control-user" type="text" list="productname" autocomplete="off" id="pname" name="product_name" placeholder="Product Name">
                                     <datalist id="productname">
                                         <?php while ($row = mysqli_fetch_array($result1)) { ?>
                                             <option value="<?php echo $row['product_name']; ?>"><?php echo $row['product_name']; ?></option>
                                         <?php } ?>
                                     </datalist>
+                                    
                                 </div>
                                 <div class="col-sm-4">
-                                    <input class="form-control form-control-user" list="productbrand" autocomplete="off" name="product_brand" type="text" placeholder="Product Brand" required>
+                                    <label for="pbrand">Product Brand</label>
+                                    <input class="form-control form-control-user" type="text" list="productbrand" autocomplete="off" id="pbrand" name="product_brand" type="text" placeholder="Product Brand">
                                     <datalist id="productbrand">
                                         <?php while ($row = mysqli_fetch_array($result2)) { ?>
                                             <option value="<?php echo $row['product_brand']; ?>"><?php echo $row['product_brand']; ?></option>
@@ -187,19 +206,96 @@
                                     </datalist>
                                 </div>
                                 <div class="col-sm-4">
+                                    <label for="quantity">Quantity</label>
                                     <input class="form-control form-control-user" name="quantity" type="number" min="1" max="99999"placeholder="Quantity" required>
+                                                                        
                                 </div>
                                 </div>
-                                <input name="fname" value="<?php echo $row_user['firstname'] ?>" type="hidden">
-                                <input name="lname" value="<?php echo $row_user['lastname'] ?>" type="hidden">
-                                <input name="u_id" value="<?php echo $row_user['user_id'] ?>" type="hidden">
+
                                 <div class="form-group row"></div>
                                 <div class="col-sm-4">
-                                <button type="submit" name="order" class="btn btn-primary btn-user btn-block">Order</button>
+                                <button type="submit" name="addonlinecart" class="btn btn-primary btn-user btn-block">Add to cart</button>
                                 </div>
+                                
                                 </form>
                                 </div>
+
+                                
                     </div>
+
+                    <!-- DataTales Example -->
+                    <div class="card shadow mb-4 ml-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Cart</h6>
+                        </div>
+                        <form method="post" action="../controllers/order.php">
+                        <div class="card-body">
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Product Name</th>
+                                            <th>Product Brand</th>
+                                            <th>Quantity</th>
+                                            <th>Retail Price</th>
+                                            <th>Market Price</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    
+                                    <tbody>
+                                    <tbody>
+                            <?php
+                            $user = $row_user['firstname'] . " " . $row_user['lastname'];
+                            $query_cart = mysqli_query($conn,"select * from cart where cart_owner = '$user'") or die(mysqli_error());
+	                        while ($row_cart = mysqli_fetch_array($query_cart)) {
+		                    $id_cart = $row_cart['id'];
+		                    ?>
+                                        <tr>
+                                            <td><?php echo $row_cart['product_name']; ?></td>
+                                            <td><?php echo $row_cart['product_brand']; ?></td>
+                                            <td><?php echo $row_cart['quantity']; ?></td>
+                                            <td>&#8369; <?php echo $row_cart['retail_price']; ?></td>
+                                            <td>&#8369; <?php echo $row_cart['price']; ?></td>
+                                            <td><a href="../controllers/delete_cart.php?delete_cart=<?php echo $id_cart; ?>"><i class="fas fa-trash-alt"></i></a></td>
+                                            <input type="hidden" name="id[]" value="<?php echo $row_cart['id']; ?>">
+                                            <input type="hidden" name="product_name[]" value="<?php echo $row_cart['product_name']; ?>">
+                                            <input type="hidden" name="product_brand[]" value="<?php echo $row_cart['product_brand']; ?>">
+                                            <input type="hidden" name="quantity[]" value="<?php echo $row_cart['quantity']; ?>">
+
+                                            <input name="fname" value="<?php echo $row_user['firstname'] ?>" type="hidden">
+                                            <input name="lname" value="<?php echo $row_user['lastname'] ?>" type="hidden">
+                                            <input name="u_id" value="<?php echo $row_user['user_id'] ?>" type="hidden">
+                                    
+                                           
+                                        </tr>
+                                    
+                                  <?php } ?>
+
+
+
+                            
+                                    </tbody>
+                                </table>
+                               
+                                
+                            </div>
+                        </div>  
+                      
+                             
+                                <div class="col-sm-4">
+                                <button type="submit" name="order" class="btn btn-primary btn-user btn-block">Oder Items</button>
+                                </div>
+
+                                <br>
+                                </form>
+                                
+                    </div>
+                    
+
+                    </div>
+              
 
 
 
@@ -222,7 +318,7 @@
                               
                                     <tbody>
                             <?php
-                            @include '../models/dbcon.php';
+                            
 	                        $query = mysqli_query($conn,"select * from products ORDER BY id ASC") or die(mysqli_error());
 	                        while ($row = mysqli_fetch_array($query)) {
 		                    $id = $row['id'];

@@ -1,5 +1,9 @@
-<?php include('../controllers/session.php');?>
-<?php include('../controllers/find.php');?>
+<?php 
+include('../controllers/session.php');
+include('../controllers/find.php');
+@include '../models/dbcon.php';
+?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -157,11 +161,12 @@
                     <h1 class="h3 mb-4 text-gray-800">Cashier Page</h1>
 
 
-               
+                    <div class="row">
+
                      <!-- Basic Card Example -->
-                     <div class="card shadow mb-4">
+                     <div class="card shadow mb-4 mr-4">
                                 <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Sell Product <br><br>
+                                    <h6 class="m-0 font-weight-bold text-primary">Add Product to Cart<br><br>
                                     <button type="button" onClick="window.location.reload();" class="btn btn-light btn-icon-split">
                                     <span class="icon text-gray-600">
                                             <i class="fas fa-arrow-right"></i>
@@ -173,14 +178,12 @@
                                 </div>
                                 <div class="card-body">
                                 <form method="post" action="../controllers/transactions.php">
-                                <div class="form-group row">
-                                <div class="col-sm-4">
-                                    <input class="form-control form-control-user" name="customer" type="text" placeholder="Customer Name" required>
-                                </div>
-                                </div>
+                           
                                 <div class="form-group row">
                                 
+                                
                                 <div class="col-sm-4">
+                                    <label for="pname">Product Name</label>
                                     <input class="form-control form-control-user" type="text" list="productname" autocomplete="off" id="pname" name="product_name" placeholder="Product Name">
                                     <datalist id="productname">
                                         <?php while ($row = mysqli_fetch_array($result1)) { ?>
@@ -190,6 +193,7 @@
                                     
                                 </div>
                                 <div class="col-sm-4">
+                                    <label for="pbrand">Product Brand</label>
                                     <input class="form-control form-control-user" type="text" list="productbrand" autocomplete="off" id="pbrand" name="product_brand" type="text" placeholder="Product Brand">
                                     <datalist id="productbrand">
                                         <?php while ($row = mysqli_fetch_array($result2)) { ?>
@@ -198,6 +202,7 @@
                                     </datalist>
                                 </div>
                                 <div class="col-sm-4">
+                                    <label for="quantity">Quantity</label>
                                     <input class="form-control form-control-user" name="quantity" type="number" min="1" max="99999"placeholder="Quantity" required>
                                                                         
                                 </div>
@@ -205,13 +210,101 @@
 
                                 <div class="form-group row"></div>
                                 <div class="col-sm-4">
-                                <button type="submit" name="sell" class="btn btn-primary btn-user btn-block">Sell</button>
+                                <button type="submit" name="addcart" class="btn btn-primary btn-user btn-block">Add to cart</button>
                                 </div>
                                 
                                 </form>
                                 </div>
 
                                 
+                    </div>
+
+                    <!-- DataTales Example -->
+                    <div class="card shadow mb-4 ml-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Cart</h6>
+                        </div>
+                        <form method="post" action="../controllers/sell.php">
+                        <div class="card-body">
+
+                                                <div class="row">
+                                <div class="col-sm-4">
+                                
+                                    <label for="customer">Customer Name</label>
+                                    <input class="form-control form-control-user" name="customer" type="text" placeholder="Customer Name" required>
+                                
+                            
+                                </div>
+
+                                <div class="col-sm-4">
+                                
+                                
+                                <label for="customer">Customer type</label>
+                                <select class="form-control form-control-user" name="customer_type" type="text" placeholder="Customer Type" required>
+                                    <option value="Retailer">Retailer</option>
+                                    <option value="Wholesaler">Wholesaler</option>
+                                </select>
+                                </div>
+                                </div>
+                                <br>
+                            <div class="table-responsive">
+                                <table class="table table-bordered" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Product Name</th>
+                                            <th>Product Brand</th>
+                                            <th>Quantity</th>
+                                            <th>Retail Price</th>
+                                            <th>Market Price</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    
+                                    <tbody>
+                                    <tbody>
+                            <?php
+                            $query_cart = mysqli_query($conn,"select * from cart where cart_owner = 'Cashier'") or die(mysqli_error());
+	                        while ($row_cart = mysqli_fetch_array($query_cart)) {
+		                    $id_cart = $row_cart['id'];
+		                    ?>
+                                        <tr>
+                                            <td><?php echo $row_cart['product_name']; ?></td>
+                                            <td><?php echo $row_cart['product_brand']; ?></td>
+                                            <td><?php echo $row_cart['quantity']; ?></td>
+                                            <td>&#8369; <?php echo $row_cart['retail_price']; ?></td>
+                                            <td>&#8369; <?php echo $row_cart['price']; ?></td>
+                                            <td><a href="../controllers/delete_cart.php?delete_cart=<?php echo $id_cart; ?>"><i class="fas fa-trash-alt"></i></a></td>
+                                            <input type="hidden" name="id[]" value="<?php echo $row_cart['id']; ?>">
+                                            <input type="hidden" name="product_name[]" value="<?php echo $row_cart['product_name']; ?>">
+                                            <input type="hidden" name="product_brand[]" value="<?php echo $row_cart['product_brand']; ?>">
+                                            <input type="hidden" name="quantity[]" value="<?php echo $row_cart['quantity']; ?>">
+                                    
+                                           
+                                        </tr>
+                                    
+                                  <?php } ?>
+
+
+
+                            
+                                    </tbody>
+                                </table>
+                               
+                                
+                            </div>
+                        </div>  
+                      
+                             
+                                <div class="col-sm-4">
+                                <button type="submit" name="sell" class="btn btn-primary btn-user btn-block">Sell</button>
+                                </div>
+                                <br>
+                                
+                                </form>
+                               
+                    </div>
+                    
+
                     </div>
 
 
@@ -236,7 +329,7 @@
                                     
                                     <tbody>
                             <?php
-                            @include '../models/dbcon.php';
+                            
 	                        $query = mysqli_query($conn,"select * from products ORDER BY id ASC") or die(mysqli_error());
 	                        while ($row = mysqli_fetch_array($query)) {
 		                    $id = $row['id'];
@@ -264,7 +357,7 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0"Orders>
                                     <thead>
                                         <tr>
                                             <th>Product Name</th>
@@ -272,14 +365,15 @@
                                             <th>Quantity</th>
                                             <th>Price</th>
                                             <th>Profit</th>
-                                            <th>Date Sent</th>
+                                            <th>Date of Transaction</th>
+                                            <th>Status</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
                                     
                                     <tbody>
                             <?php
-                            @include '../models/dbcon.php';
+                            
 	                        $query2 = mysqli_query($conn,"select * from orders") or die(mysqli_error());
 	                        while ($row2 = mysqli_fetch_array($query2)) {
                             $price = $row2['price'];
@@ -298,8 +392,10 @@
                                             <td>&#8369; <?php echo $row2['price']; ?></td>
                                             <td>&#8369; <?php echo $profit; ?></td>
                                             <td><?php echo $row2['day']; ?></td>
+                                            <td><?php echo $row2['status']; ?></td>
                                             <td>
                                             <form method="post" action="../controllers/transactions.php">
+                                            <input type="hidden" name="order_id" value="<?php echo $row2['order_id']; ?>">
                                             <input type="hidden" name="product_name" value="<?php echo $row2['product_name']; ?>">
                                             <input type="hidden" name="product_brand" value="<?php echo $row2['product_brand']; ?>">
                                             <input type="hidden" name="quantity" value="<?php echo $row2['quantity']; ?>">
@@ -315,7 +411,158 @@
                                             </td>
                                         </tr>
                                     
-                                  <?php }} ?>
+                                  <?php } elseif($stat == 'Returned'){ ?>
+
+                                            <tr>
+                                            <td><?php echo $row2['product_name']; ?></td>
+                                            <td><?php echo $row2['product_brand']; ?></td>
+                                            <td><?php echo $row2['quantity']; ?></td>
+                                            <td>&#8369; <?php echo $row2['price']; ?></td>
+                                            <td>&#8369; <?php echo $profit; ?></td>
+                                            <td><?php echo $row2['day']; ?></td>
+                                            <td><?php echo $row2['status']; ?></td>
+                                            <td>
+                                            <form method="post" action="../controllers/transactions.php">
+                                            <input type="hidden" name="product_name" value="<?php echo $row2['product_name']; ?>">
+                                            <input type="hidden" name="product_brand" value="<?php echo $row2['product_brand']; ?>">
+                                            <input type="hidden" name="quantity" value="<?php echo $row2['quantity']; ?>">
+                                            <input type="hidden" name="order_id" value="<?php echo $row2['order_id']; ?>">
+                                            <input type="hidden" name="customer" value="<?php echo $row2['fname']; ?> <?php echo $row2['lname']; ?>">
+                                            <button name="putback" type="submit" class="btn btn-primary btn-icon-split">
+                                                <span class="icon text-white-50">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                                <span class="text">Put Back</span>
+                                            </button>
+                                            <button name="damaged" type="submit" class="btn btn-danger btn-icon-split">
+                                                <span class="icon text-white-50">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                                <span class="text">Mark as damaged</span>
+                                            </button>
+                                            </form>
+                                            </td>
+                                             </tr>
+                                
+                                
+                                
+                                
+                               <?php }elseif($stat == 'Damaged'){ ?>
+
+                                <tr>
+                                            <td><?php echo $row2['product_name']; ?></td>
+                                            <td><?php echo $row2['product_brand']; ?></td>
+                                            <td><?php echo $row2['quantity']; ?></td>
+                                            <td>&#8369; <?php echo $row2['price']; ?></td>
+                                            <td>&#8369; <?php echo $profit; ?></td>
+                                            <td><?php echo $row2['day']; ?></td>
+                                            <td><?php echo $row2['status']; ?></td>
+                                            <td>
+                                            Damaged Product No Action Needed
+                                            </td>
+                                             </tr>
+
+
+
+
+
+                              <?php }
+                              elseif($stat == 'Restock'){ ?>
+
+                                <tr>
+                                            <td><?php echo $row2['product_name']; ?></td>
+                                            <td><?php echo $row2['product_brand']; ?></td>
+                                            <td><?php echo $row2['quantity']; ?></td>
+                                            <td>&#8369; <?php echo $row2['price']; ?></td>
+                                            <td>&#8369; <?php echo $profit; ?></td>
+                                            <td><?php echo $row2['day']; ?></td>
+                                            <td><?php echo $row2['status']; ?></td>
+                                            <td>
+                                            Product Restocked No Action Needed
+                                            </td>
+                                             </tr>
+
+
+
+
+
+                              <?php }
+                              elseif($stat == 'Done'){ ?>
+
+                                <tr>
+                                            <td><?php echo $row2['product_name']; ?></td>
+                                            <td><?php echo $row2['product_brand']; ?></td>
+                                            <td><?php echo $row2['quantity']; ?></td>
+                                            <td>&#8369; <?php echo $row2['price']; ?></td>
+                                            <td>&#8369; <?php echo $profit; ?></td>
+                                            <td><?php echo $row2['day']; ?></td>
+                                            <td><?php echo $row2['status']; ?></td>
+                                            <td>
+                                            Product Successfully Delivered No Action Needed
+                                            </td>
+                                             </tr>
+
+
+
+
+
+                              <?php }} ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- DataTales Example -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Returned Products Due to Damage</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Product Name</th>
+                                            <th>Product Brand</th>
+                                            <th>Quantity</th>
+                                            <th>Retail Price</th>
+                                            <th>Market Price</th>
+                                            <th>Date</th>  
+                                            <th>Reason</th>                                      
+                                           
+                                        </tr>
+                                    </thead>
+                                 
+                                    <tbody>
+                                  
+                            <?php
+                            
+	                        $query_damage = mysqli_query($conn,"select * from orders where status = 'Damaged'") or die(mysqli_error());
+	                        while ($row_damaged = mysqli_fetch_array($query_damage)) {
+                            $price = $row_damaged['price'];
+                            $retail = $row_damaged['retail_price'];
+                            $qnt = $row_damaged['quantity'];
+                            $profit = ($price - $retail)* $qnt;
+                            $stat = $row_damaged['status'];
+                        
+
+                            
+		                    ?>
+                                        <tr>
+                                            <td><?php echo $row_damaged['product_name']; ?></td>
+                                            <td><?php echo $row_damaged['product_brand']; ?></td>
+                                            <td><?php echo $row_damaged['quantity']; ?></td>
+                                            <td>&#8369; <?php echo $row_damaged['price']; ?></td>
+                                            <td>&#8369; <?php echo $profit; ?></td>
+                                            <td><?php echo $row_damaged['day']; ?></td>
+                                            <td><?php echo $row_damaged['status']; ?></td>
+                                      
+                                        </tr>
+                                    
+                                  <?php } ?>
+                       
                                     </tbody>
                                 </table>
                             </div>
@@ -340,13 +587,14 @@
                                             <th>Price</th>
                                             <th>Profit</th>
                                             <th>Sold To</th>
+                                            <th>Customer Type</th>
                                             <th>Date of Transaction</th>
                                         </tr>
                                     </thead>
                                   
                                     <tbody>
                             <?php
-                            @include '../models/dbcon.php';
+                            
 	                        $query2 = mysqli_query($conn,"select * from transactions ORDER BY day DESC") or die(mysqli_error());
 	                        while ($row2 = mysqli_fetch_array($query2)) {
 		                    $id = $row2['id'];
@@ -362,6 +610,7 @@
                                             <td>&#8369; <?php echo $row2['price']; ?></td>
                                             <td>&#8369; <?php echo $profit; ?></td>
                                             <td><?php echo $row2['customer']; ?></td>
+                                            <td><?php echo $row2['customer_type']; ?></td>
                                             <td><?php echo $row2['day']; ?></td>
                                         </tr>
                                     

@@ -1,4 +1,7 @@
-<?php include('../controllers/session.php')?>
+<?php 
+include('../controllers/session.php');
+@include '../models/dbcon.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,7 +13,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Cashier</title>
+    <title>Egay’s Enterprises</title>
 
     <!-- Custom fonts for this template-->
     <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -114,7 +117,7 @@
                     
 
                         <?php
-                            @include '../models/dbcon.php';
+                            
 	                        $query_user = mysqli_query($conn,"select * from user where user_id = $session_id") or die(mysqli_error());
 	                        $row_user = mysqli_fetch_array($query_user);
 		                    $user_id = $row_user['user_id'];
@@ -172,32 +175,75 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <table class="table table-bordered"  width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
                                             <th>Product Name</th>
                                             <th>Product Brand</th>
                                             <th>Quantity</th>
                                             <th>Total Price</th>
+                                            <th>Date of Transaction</th>
                                             <th>Status</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                  
                                     <tbody>
                             <?php
-                            @include '../models/dbcon.php';
-	                        $query = mysqli_query($conn,"select * from orders where u_id = $user_id") or die(mysqli_error());
+                            
+	                        $query = mysqli_query($conn,"select * from orders where u_id = $user_id order by day asc") or die(mysqli_error());
 	                        while ($row = mysqli_fetch_array($query)) {
                             $price = $row['price'];
                             $qnt = $row['quantity'];
 		                    $total_price = $price * $qnt;
+                          
 		                    ?>
                                         <tr>
                                             <td><?php echo $row['product_name']; ?></td>
                                             <td><?php echo $row['product_brand']; ?></td>
                                             <td><?php echo $row['quantity']; ?></td>
                                             <td>&#8369; <?php echo $total_price; ?></td>
-                                            <td><?php echo $row['status']; ?></td>
+                                            <td><?php echo $row['day']; ?></td>
+                                            <td><?php 
+                                            if ($row['status'] == "Restock") {
+                                            echo 'Returned'; 
+                                            }elseif ($row['status'] == "Damaged"){
+                                            echo 'Returned'; 
+                                            }
+                                            else{
+                                            echo $row['status'];
+                                            }
+                                            ?></td>
+                                            <td>
+                                                <?php
+                                                if ($row['status'] == "Done") {
+
+                                                    $date_to_check = $row['day']; // format: m-d-Y
+                                                    $date_obj = DateTime::createFromFormat('m-d-Y', $date_to_check);
+                                                    $yesterday = new DateTime('-1 day');
+
+                                                    if ($date_obj < $yesterday) {
+                                                        echo 'Successfully Delivered';
+                                                    } else { ?>
+
+                                                <a href="../controllers/transactions.php?order_id=<?php echo $row['order_id']; ?>" class="btn btn-warning btn-icon-split">
+                                                    <span class="icon text-white-50">
+                                                        <i class="fas fa-info-circle"></i>
+                                                    </span>
+                                                    <span class="text">Return Product</span>
+                                                </a>
+                                                   
+                                                   <?php  } }elseif ($row['status'] == "Returned" || $row['status'] == "Restock" || $row['status'] == "Damaged") {
+                                                       
+                                                   
+
+                                                    echo 'Returned no action needed';
+
+                                                   }?> 
+                                                
+                                            </td>
+
+
                                         </tr>
                                     
                                   <?php } ?>

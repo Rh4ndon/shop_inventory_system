@@ -180,11 +180,16 @@
                                     <input class="form-control form-control-user" name="product_brand" value="<?php echo $row['product_brand'];?>"type="text" placeholder="Product Brand" required>
                                 </div>
                                 <div class="col-sm-4">
+                                    <label>Supplier Name</label>
+                                    <input class="form-control form-control-user" name="supplier" value="<?php echo $row['supplier'];?>"type="text" placeholder="Supplier Name" required>
+                                </div>
+                                
+                                </div>
+                                <div class="form-group row">
+                                <div class="col-sm-4">
                                     <label>Quantity</label>
                                     <input class="form-control form-control-user" name="quantity" type="number" value="<?php echo $row['quantity'];?>" min="1" max="99999"placeholder="Quantity" required>
                                 </div>
-                                </div>
-                                <div class="form-group row">
                                 <div class="col-sm-4">
                                     <label>Retail Price</label>
                                     <input class="form-control form-control-user" name="rprice" type="number" value="<?php echo $row['retail_price'];?>" min="1" max="99999"placeholder="Retail Price" required>
